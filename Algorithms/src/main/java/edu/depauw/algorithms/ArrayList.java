@@ -138,6 +138,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      * @throws NoSuchElementException {@inheritDoc}
      * @since 21
      */
+    @Override
     public E getFirst() {
         return get(0);
     }
@@ -148,6 +149,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      * @throws NoSuchElementException {@inheritDoc}
      * @since 21
      */
+    @Override
     public E getLast() {
         return get(size - 1);
     }
@@ -206,6 +208,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      *
      * @since 21
      */
+    @Override
     public void addFirst(E element) {
         add(0, element);
     }
@@ -215,6 +218,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      *
      * @since 21
      */
+    @Override
     public void addLast(E element) {
         add(size, element);
     }
@@ -248,6 +252,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      * @throws NoSuchElementException {@inheritDoc}
      * @since 21
      */
+    @Override
     public E removeFirst() {
         return remove(0);
     }
@@ -258,6 +263,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      * @throws NoSuchElementException {@inheritDoc}
      * @since 21
      */
+    @Override
     public E removeLast() {
         return remove(size - 1);
     }

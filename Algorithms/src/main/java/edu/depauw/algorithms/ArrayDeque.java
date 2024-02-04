@@ -1,6 +1,5 @@
 package edu.depauw.algorithms;
 
-import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
@@ -8,8 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.function.Consumer;
+
+import edu.depauw.algorithms.details.ArrayDequeDetails;
 
 /**
  * Reimplementation of java.util.ArrayDeque for instructional purposes. Based on
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  *
  * @author bhoward
  */
-public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
+public class ArrayDeque<E> extends ArrayDequeDetails<E> implements Deque<E> {
     private static final int DEFAULT_CAPACITY = 10;
     private static final double GROWTH_FACTOR = 1.5;
 
@@ -46,6 +46,22 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
      * data.length to disambiguate.
      */
     private int size;
+
+    /** debugging */
+    void checkInvariants() {
+        try {
+            int capacity = data.length;
+            assert 0 <= head && head < capacity;
+            assert 0 <= tail && tail < capacity;
+            assert capacity > 0;
+            assert size() <= capacity;
+            assert data[tail] == null;
+        } catch (Throwable t) {
+            System.err.printf("head=%d tail=%d capacity=%d%n", head, tail, data.length);
+            System.err.printf("elements=%s%n", Arrays.toString(data));
+            throw t;
+        }
+    }
 
     /**
      * Constructs an empty array deque with an initial capacity sufficient to hold
@@ -115,14 +131,14 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
      * Circularly increments i, mod modulus. Precondition and postcondition: 0 <= i
      * < modulus.
      */
-    static final int inc(int i, int modulus) {
+    private static final int inc(int i, int modulus) {
         return (i + 1) % modulus;
     }
 
     /**
      * Adds j to i, mod modulus. Precondition: 0 <= i < modulus, 0 <= j.
      */
-    static final int add(int i, int j, int modulus) {
+    private static final int add(int i, int j, int modulus) {
         return (i + j) % modulus;
     }
 
@@ -130,7 +146,7 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
      * Circularly decrements i, mod modulus. Precondition and postcondition: 0 <= i
      * < modulus.
      */
-    static final int dec(int i, int modulus) {
+    private static final int dec(int i, int modulus) {
         return (i - 1 + modulus) % modulus;
     }
 
@@ -141,7 +157,7 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
      * @return the "circular distance" from j to i; corner case i == j is
      *         disambiguated to "empty", returning 0.
      */
-    static final int sub(int i, int j, int modulus) {
+    private static final int sub(int i, int j, int modulus) {
         return (i - j + modulus) % modulus;
     }
 
@@ -162,10 +178,6 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
     public int size() {
         return size;
     }
-
-    // The main insertion and extraction methods are addFirst,
-    // addLast, pollFirst, pollLast. The other methods are defined in
-    // terms of these.
 
     /**
      * Inserts the specified element at the front of this deque.
@@ -201,56 +213,6 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
     }
 
     /**
-     * Inserts the specified element at the front of this deque.
-     *
-     * @param e the element to add
-     * @return {@code true} (as specified by {@link Deque#offerFirst})
-     * @throws NullPointerException if the specified element is null
-     */
-    @Override
-    public boolean offerFirst(E e) {
-        addFirst(e);
-        return true;
-    }
-
-    /**
-     * Inserts the specified element at the end of this deque.
-     *
-     * @param e the element to add
-     * @return {@code true} (as specified by {@link Deque#offerLast})
-     * @throws NullPointerException if the specified element is null
-     */
-    @Override
-    public boolean offerLast(E e) {
-        addLast(e);
-        return true;
-    }
-
-    @Override
-    public E pollFirst() {
-        if (size == 0) {
-            return null;
-        }
-        E e = elementAt(head);
-        data[head] = null;
-        head = inc(head, data.length);
-        size--;
-        return e;
-    }
-
-    @Override
-    public E pollLast() {
-        if (size == 0) {
-            return null;
-        }
-        tail = dec(tail, data.length);
-        E e = elementAt(tail);
-        data[tail] = null;
-        size--;
-        return e;
-    }
-
-    /**
      * @throws NoSuchElementException {@inheritDoc}
      */
     @Override
@@ -258,7 +220,11 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
         if (size == 0) {
             throw new NoSuchElementException();
         }
-        return pollFirst();
+        E e = elementAt(head);
+        data[head] = null;
+        head = inc(head, data.length);
+        size--;
+        return e;
     }
 
     /**
@@ -269,7 +235,11 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
         if (size == 0) {
             throw new NoSuchElementException();
         }
-        return pollLast();
+        tail = dec(tail, data.length);
+        E e = elementAt(tail);
+        data[tail] = null;
+        size--;
+        return e;
     }
 
     /**
@@ -292,32 +262,6 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
             throw new NoSuchElementException();
         }
         return elementAt(dec(tail, data.length));
-    }
-
-    @Override
-    public E peekFirst() {
-        return elementAt(head);
-    }
-
-    @Override
-    public E peekLast() {
-        return elementAt(dec(tail, data.length));
-    }
-
-    /**
-     * Inserts the specified element at the end of this deque.
-     *
-     * <p>
-     * This method is equivalent to {@link #addLast}.
-     *
-     * @param e the element to add
-     * @return {@code true} (as specified by {@link Collection#add})
-     * @throws NullPointerException if the specified element is null
-     */
-    @Override
-    public boolean add(E e) {
-        addLast(e);
-        return true;
     }
 
     /**
@@ -392,118 +336,6 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
             }
         }
         return false;
-    }
-
-    /**
-     * Inserts the specified element at the end of this deque.
-     *
-     * <p>
-     * This method is equivalent to {@link #offerLast}.
-     *
-     * @param e the element to add
-     * @return {@code true} (as specified by {@link Queue#offer})
-     * @throws NullPointerException if the specified element is null
-     */
-    @Override
-    public boolean offer(E e) {
-        return offerLast(e);
-    }
-
-    /**
-     * Retrieves and removes the head of the queue represented by this deque.
-     *
-     * This method differs from {@link #poll() poll()} only in that it throws an
-     * exception if this deque is empty.
-     *
-     * <p>
-     * This method is equivalent to {@link #removeFirst}.
-     *
-     * @return the head of the queue represented by this deque
-     * @throws NoSuchElementException {@inheritDoc}
-     */
-    @Override
-    public E remove() {
-        return removeFirst();
-    }
-
-    /**
-     * Retrieves and removes the head of the queue represented by this deque (in
-     * other words, the first element of this deque), or returns {@code null} if
-     * this deque is empty.
-     *
-     * <p>
-     * This method is equivalent to {@link #pollFirst}.
-     *
-     * @return the head of the queue represented by this deque, or {@code null} if
-     *         this deque is empty
-     */
-    @Override
-    public E poll() {
-        return pollFirst();
-    }
-
-    /**
-     * Retrieves, but does not remove, the head of the queue represented by this
-     * deque. This method differs from {@link #peek peek} only in that it throws an
-     * exception if this deque is empty.
-     *
-     * <p>
-     * This method is equivalent to {@link #getFirst}.
-     *
-     * @return the head of the queue represented by this deque
-     * @throws NoSuchElementException {@inheritDoc}
-     */
-    @Override
-    public E element() {
-        return getFirst();
-    }
-
-    /**
-     * Retrieves, but does not remove, the head of the queue represented by this
-     * deque, or returns {@code null} if this deque is empty.
-     *
-     * <p>
-     * This method is equivalent to {@link #peekFirst}.
-     *
-     * @return the head of the queue represented by this deque, or {@code null} if
-     *         this deque is empty
-     */
-    @Override
-    public E peek() {
-        return peekFirst();
-    }
-
-    // *** Stack methods ***
-
-    /**
-     * Pushes an element onto the stack represented by this deque. In other words,
-     * inserts the element at the front of this deque.
-     *
-     * <p>
-     * This method is equivalent to {@link #addFirst}.
-     *
-     * @param e the element to push
-     * @throws NullPointerException if the specified element is null
-     */
-    @Override
-    public void push(E e) {
-        addFirst(e);
-    }
-
-    /**
-     * Pops an element from the stack represented by this deque. In other words,
-     * removes and returns the first element of this deque.
-     *
-     * <p>
-     * This method is equivalent to {@link #removeFirst()}.
-     *
-     * @return the element at the front of this deque (which is the top of the stack
-     *         represented by this deque)
-     * @throws NoSuchElementException {@inheritDoc}
-     */
-    @Override
-    public E pop() {
-        return removeFirst();
     }
 
     /**
@@ -607,22 +439,6 @@ public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E> {
             for (int i = 0; i < remaining; i++) {
                 action.accept(elementAt(sub(cursor, i, data.length)));
             }
-        }
-    }
-
-    /** debugging */
-    void checkInvariants() {
-        try {
-            int capacity = data.length;
-            assert 0 <= head && head < capacity;
-            assert 0 <= tail && tail < capacity;
-            assert capacity > 0;
-            assert size() <= capacity;
-            assert data[tail] == null;
-        } catch (Throwable t) {
-            System.err.printf("head=%d tail=%d capacity=%d%n", head, tail, data.length);
-            System.err.printf("elements=%s%n", Arrays.toString(data));
-            throw t;
         }
     }
 }

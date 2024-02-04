@@ -1,11 +1,11 @@
 package edu.depauw.algorithms;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.RandomAccess;
+
+import edu.depauw.algorithms.details.ArrayListDetails;
 
 /**
  * Reimplementation of java.util.ArrayList for instructional purposes. Based on
@@ -17,12 +17,18 @@ import java.util.RandomAccess;
  *
  * @author bhoward
  */
-public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAccess {
+public class ArrayList<E> extends ArrayListDetails<E> implements List<E>, RandomAccess {
     private static final int DEFAULT_CAPACITY = 10;
     private static final double GROWTH_FACTOR = 1.5;
 
     private Object[] data;
     private int size;
+
+    /** debugging */
+    void checkInvariants() {
+        assert size >= 0;
+        assert size == data.length || data[size] == null;
+    }
 
     /**
      * Constructs an empty list with the specified initial capacity.
@@ -133,28 +139,6 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @throws NoSuchElementException {@inheritDoc}
-     * @since 21
-     */
-    @Override
-    public E getFirst() {
-        return get(0);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws NoSuchElementException {@inheritDoc}
-     * @since 21
-     */
-    @Override
-    public E getLast() {
-        return get(size - 1);
-    }
-
-    /**
      * Replaces the element at the specified position in this list with the
      * specified element.
      *
@@ -192,38 +176,6 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
     }
 
     /**
-     * Appends the specified element to the end of this list.
-     *
-     * @param e element to be appended to this list
-     * @return {@code true} (as specified by {@link Collection#add})
-     */
-    @Override
-    public boolean add(E e) {
-        add(size, e);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @since 21
-     */
-    @Override
-    public void addFirst(E element) {
-        add(0, element);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @since 21
-     */
-    @Override
-    public void addLast(E element) {
-        add(size, element);
-    }
-
-    /**
      * Removes the element at the specified position in this list. Shifts any
      * subsequent elements to the left (subtracts one from their indices).
      *
@@ -244,32 +196,5 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
         data[size] = null;
 
         return oldValue;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws NoSuchElementException {@inheritDoc}
-     * @since 21
-     */
-    @Override
-    public E removeFirst() {
-        return remove(0);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws NoSuchElementException {@inheritDoc}
-     * @since 21
-     */
-    @Override
-    public E removeLast() {
-        return remove(size - 1);
-    }
-
-    void checkInvariants() {
-        assert size >= 0;
-        assert size == data.length || data[size] == null;
     }
 }

@@ -1,7 +1,6 @@
 package edu.depauw.algorithms;
 
 import java.util.AbstractMap;
-import java.util.AbstractSet;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
@@ -9,6 +8,9 @@ import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
+
+import edu.depauw.algorithms.details.AbstractSortedSet;
 
 /**
  * Red-Black tree implementation based on Sedgewick, "Algorithms" (4th edition).
@@ -398,9 +400,58 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
         return node == null || !node.red;
     }
 
+    // TODO use the java.util.TreeMap versions of these, and put in details package
     @Override
+	public Set<K> keySet() {
+		return new AbstractSortedSet<K>() {
+			@Override
+			public int size() {
+				return size;
+			}
+
+			@Override
+			public Iterator<K> iterator() {
+				return new KeySetIterator(firstEntry());
+			}
+			
+			@Override
+			public Comparator<? super K> comparator() {
+				return comparator;
+			}
+
+			@Override
+			public K first() {
+				return firstKey();
+			}
+
+			@Override
+			public K last() {
+				return lastKey();
+			}
+
+			@Override
+			public SortedSet<K> subSet(K fromElement, K toElement) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public SortedSet<K> headSet(K toElement) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public SortedSet<K> tailSet(K fromElement) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+	}
+
+	@Override
     public Set<Map.Entry<K, V>> entrySet() {
-        return new AbstractSet<>() {
+        return new AbstractSortedSet<>() {
             @Override
             public int size() {
                 return size;
@@ -410,7 +461,61 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
             public Iterator<Map.Entry<K, V>> iterator() {
                 return new EntrySetIterator(firstEntry());
             }
+
+			@Override
+			public Comparator<? super Map.Entry<K, V>> comparator() {
+				return (e1, e2) -> comparator.compare(e1.getKey(), e2.getKey());
+			}
+
+			@Override
+			public Map.Entry<K, V> first() {
+				return firstEntry();
+			}
+
+			@Override
+			public Map.Entry<K, V> last() {
+				return lastEntry();
+			}
+
+			@Override
+			public SortedSet<Map.Entry<K, V>> subSet(Map.Entry<K, V> fromElement,
+					Map.Entry<K, V> toElement) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public SortedSet<Map.Entry<K, V>> headSet(Map.Entry<K, V> toElement) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public SortedSet<Map.Entry<K, V>> tailSet(Map.Entry<K, V> fromElement) {
+				// TODO Auto-generated method stub
+				return null;
+			}
         };
+    }
+
+    private class KeySetIterator implements Iterator<K> {
+        private Entry<K, V> next;
+
+        public KeySetIterator(Entry<K, V> entry) {
+            this.next = entry;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        @Override
+        public K next() {
+            var result = next.key;
+            next = successor(next);
+            return result;
+        }
     }
 
     private class EntrySetIterator implements Iterator<Map.Entry<K, V>> {

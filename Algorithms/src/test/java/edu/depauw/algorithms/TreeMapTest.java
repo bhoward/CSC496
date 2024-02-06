@@ -33,8 +33,8 @@ public class TreeMapTest {
     private static class TreeMapGenerator extends TestStringSortedMapGenerator {
         @Override
         protected SortedMap<String, String> create(Entry<String, String>[] entries) {
-//            SortedMap<String, String> map = new edu.depauw.algorithms.TreeMap<>();
-            SortedMap<String, String> map = new java.util.TreeMap<>();
+            SortedMap<String, String> map = new edu.depauw.algorithms.TreeMap<>();
+//            SortedMap<String, String> map = new java.util.TreeMap<>();
             for (var entry : entries) {
                 map.put(entry.getKey(), entry.getValue());
             }

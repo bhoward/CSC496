@@ -70,18 +70,20 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
             return oldValue;
         }
 
+        @Override
         public boolean equals(Object o) {
-            return o instanceof Map.Entry<?, ?> e
-                    && Objects.equals(key, e.getKey())
+            return o instanceof Map.Entry<?, ?> e && Objects.equals(key, e.getKey())
                     && Objects.equals(value, e.getValue());
         }
 
+        @Override
         public int hashCode() {
-            int keyHash = (key==null ? 0 : key.hashCode());
-            int valueHash = (value==null ? 0 : value.hashCode());
+            int keyHash = (key == null ? 0 : key.hashCode());
+            int valueHash = (value == null ? 0 : value.hashCode());
             return keyHash ^ valueHash;
         }
 
+        @Override
         public String toString() {
             return key + "=" + value;
         }
@@ -662,7 +664,9 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
         size = 0;
     }
 
-    // Views
+    // ------------------------------------------------------------------------
+    // Views -- Ignore everything from this point on if you don't want the gory
+    // details
 
     /**
      * Fields initialized to contain an instance of the entry set view the first
@@ -1583,11 +1587,11 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
                     return m.size();
                 }
                 int size = 0;
-                    Iterator<?> i = iterator();
-                    while (i.hasNext()) {
-                        size++;
-                        i.next();
-                    }
+                Iterator<?> i = iterator();
+                while (i.hasNext()) {
+                    size++;
+                    i.next();
+                }
                 return size;
             }
 

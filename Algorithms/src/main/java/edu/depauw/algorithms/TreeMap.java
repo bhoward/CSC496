@@ -249,12 +249,14 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
         } else {
             if (isRed(node.left)) {
                 node = rotateRight(node);
+                compare = compare(key, node.key);
             }
             if (compare == 0 && (node.right == null)) {
                 return null;
             }
             if (isBlack(node.right) && isBlack(node.right.left)) {
                 node = moveRedRight(node);
+                compare = compare(key, node.key);
             }
             if (compare == 0) {
                 var x = min(node.right);
@@ -454,7 +456,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
     }
 
     private Entry<K, V> searchSucc(Entry<K, V> node, Entry<K, V> current, Entry<K, V> candidate) {
-        if (current == node) {
+        if (current.equals(node)) {
             return candidate;
         }
 
@@ -474,7 +476,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
     }
 
     private Entry<K, V> searchPred(Entry<K, V> node, Entry<K, V> current, Entry<K, V> candidate) {
-        if (current == node) {
+        if (current.equals(node)) {
             return candidate;
         }
 

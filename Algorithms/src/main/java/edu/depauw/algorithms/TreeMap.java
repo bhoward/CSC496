@@ -69,6 +69,22 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
             this.value = value;
             return oldValue;
         }
+
+        public boolean equals(Object o) {
+            return o instanceof Map.Entry<?, ?> e
+                    && Objects.equals(key, e.getKey())
+                    && Objects.equals(value, e.getValue());
+        }
+
+        public int hashCode() {
+            int keyHash = (key==null ? 0 : key.hashCode());
+            int valueHash = (value==null ? 0 : value.hashCode());
+            return keyHash ^ valueHash;
+        }
+
+        public String toString() {
+            return key + "=" + value;
+        }
     }
 
     @Override
@@ -106,6 +122,9 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
 
     @Override
     public V get(Object key) {
+        if (key == null) {
+            throw new NullPointerException();
+        }
         var node = getEntry(key);
         if (node == null) {
             return null;
@@ -142,6 +161,9 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
 
     @Override
     public V put(K key, V value) {
+        if (key == null) {
+            throw new NullPointerException();
+        }
         var node = getEntry(key);
         if (node != null) {
             var oldValue = node.value;
@@ -206,10 +228,10 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
             }
 
             root = delete(root, (K) key);
+            size--;
             if (!isEmpty()) {
                 root.red = false;
             }
-            size--;
             return oldValue;
         }
 
@@ -292,10 +314,10 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
             root.red = true;
         }
         root = deleteMin(root);
+        size--;
         if (!isEmpty()) {
             root.red = false;
         }
-        size--;
 
         return oldEntry;
     }
@@ -323,10 +345,10 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
             root.red = true;
         }
         root = deleteMax(root);
+        size--;
         if (!isEmpty()) {
             root.red = false;
         }
-        size--;
 
         return oldEntry;
     }
@@ -457,9 +479,9 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
         }
 
         if (compare(node.key, current.key) < 0) {
-            return searchSucc(node, current.left, candidate);
+            return searchPred(node, current.left, candidate);
         } else {
-            return searchSucc(node, current.right, current);
+            return searchPred(node, current.right, current);
         }
     }
 
@@ -1553,21 +1575,17 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
         // View classes
 
         abstract class EntrySetView extends AbstractSet<Map.Entry<K, V>> {
-            private transient int size = -1;
-
             @Override
             public int size() {
                 if (fromStart && toEnd) {
                     return m.size();
                 }
-                if (size == -1) {
-                    size = 0;
+                int size = 0;
                     Iterator<?> i = iterator();
                     while (i.hasNext()) {
                         size++;
                         i.next();
                     }
-                }
                 return size;
             }
 
@@ -1652,9 +1670,9 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements NavigableMap<K, 
                     throw new IllegalStateException();
                 }
                 // deleted entries are replaced by their successors
-                if (lastReturned.left != null && lastReturned.right != null) {
-                    next = lastReturned;
-                }
+//                if (lastReturned.left != null && lastReturned.right != null) {
+//                    next = lastReturned;
+//                }
                 m.remove(lastReturned.getKey());
                 lastReturned = null;
             }

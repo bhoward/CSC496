@@ -184,7 +184,7 @@ public class EulerianCycle {
 
         // Condition 2: graph is connected, ignoring isolated vertices
         int s = nonIsolatedVertex(G);
-        BreadthFirstPaths bfs = new BreadthFirstPaths(G, s);
+        BFSPaths bfs = new BFSPaths(G, s);
         for (int v = 0; v < G.V(); v++)
             if (G.degree(v) > 0 && !bfs.hasPathTo(v))
                 return false;

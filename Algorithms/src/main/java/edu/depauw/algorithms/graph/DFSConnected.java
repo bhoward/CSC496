@@ -24,7 +24,7 @@ import edu.depauw.algorithms.TreeBag;
  *  The {@code DFSConnected} class represents a data type for
  *  determining the vertices connected to a given source vertex <em>s</em>
  *  in a graph. For versions that find the paths, see
- *  {@link DFSPaths} and {@link BreadthFirstPaths}.
+ *  {@link DFSPaths} and {@link BFSPaths}.
  *  <p>
  *  This implementation uses depth-first search.
  *  See {@link NonrecursiveDFS} for a non-recursive version.

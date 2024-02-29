@@ -154,7 +154,7 @@ public class DirectedEulerianPath {
 
         // check that all non-isolated vertices are connected
         int s = nonIsolatedVertex(G);
-        BreadthFirstPaths bfs = new BreadthFirstPaths(H, s);
+        BFSPaths bfs = new BFSPaths(H, s);
         for (int v = 0; v < G.V(); v++)
             if (H.degree(v) > 0 && !bfs.hasPathTo(v))
                 return false;

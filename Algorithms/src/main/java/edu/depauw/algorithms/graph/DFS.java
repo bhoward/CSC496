@@ -1,7 +1,7 @@
 package edu.depauw.algorithms.graph;
 
 public abstract class DFS {
-    boolean[] marked; // marked[v] = is there an s-v path?
+    protected boolean[] marked; // marked[v] = is there an s-v path?
     protected boolean halt;
 
     public DFS(Graph G) {

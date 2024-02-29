@@ -2,15 +2,6 @@
  * Based on Sedgewick and Wayne,
  * https://github.com/kevin-wayne/algs4/
  *
- *  %  java Graph tinyCG.txt
- *  6 vertices, 8 edges
- *  0: 1 2 5
- *  1: 0 2
- *  2: 0 1 3 4
- *  3: 2 4 5
- *  4: 2 3
- *  5: 0 3
- *
  *  %  java BreadthFirstPaths tinyCG.txt 0
  *  0 to 0 (0):  0
  *  0 to 1 (1):  0-1
@@ -59,9 +50,9 @@ import edu.depauw.algorithms.ArrayDeque;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class BreadthFirstPaths {
+public class BFSPaths implements BFSClient {
+	private BFS bfs;
     private static final int INFINITY = Integer.MAX_VALUE;
-    private boolean[] marked;  // marked[v] = is there an s-v path
     private int[] edgeTo;      // edgeTo[v] = previous edge on shortest s-v path
     private int[] distTo;      // distTo[v] = number of edges shortest s-v path
 
@@ -72,12 +63,15 @@ public class BreadthFirstPaths {
      * @param s the source vertex
      * @throws IllegalArgumentException unless {@code 0 <= s < V}
      */
-    public BreadthFirstPaths(Graph G, int s) {
-        marked = new boolean[G.V()];
+    public BFSPaths(Graph G, int s) {
+    	bfs = new BFS(G);
         distTo = new int[G.V()];
         edgeTo = new int[G.V()];
-        validateVertex(s);
-        bfs(G, s);
+        for (int v = 0; v < G.V(); v++)
+            distTo[v] = INFINITY;
+        bfs.validateVertex(s);
+        distTo[s] = 0;
+        bfs.bfs(G, s, this);
     }
 
     /**
@@ -90,59 +84,31 @@ public class BreadthFirstPaths {
      * @throws IllegalArgumentException unless {@code 0 <= s < V} for each vertex
      *         {@code s} in {@code sources}
      */
-    public BreadthFirstPaths(Graph G, Iterable<Integer> sources) {
-        marked = new boolean[G.V()];
+    public BFSPaths(Graph G, Iterable<Integer> sources) {
+    	bfs = new BFS(G);
         distTo = new int[G.V()];
         edgeTo = new int[G.V()];
         for (int v = 0; v < G.V(); v++)
             distTo[v] = INFINITY;
-        validateVertices(sources);
-        bfs(G, sources);
-    }
-
-
-    // breadth-first search from a single source
-    private void bfs(Graph G, int s) {
-        Deque<Integer> q = new ArrayDeque<>();
-        for (int v = 0; v < G.V(); v++)
-            distTo[v] = INFINITY;
-        distTo[s] = 0;
-        marked[s] = true;
-        q.add(s);
-
-        while (!q.isEmpty()) {
-            int v = q.remove();
-            for (int w : G.adj(v)) {
-                if (!marked[w]) {
-                    edgeTo[w] = v;
-                    distTo[w] = distTo[v] + 1;
-                    marked[w] = true;
-                    q.add(w);
-                }
-            }
-        }
-    }
-
-    // breadth-first search from multiple sources
-    private void bfs(Graph G, Iterable<Integer> sources) {
-        Deque<Integer> q = new ArrayDeque<Integer>();
+        bfs.validateVertices(sources);
         for (int s : sources) {
-            marked[s] = true;
-            distTo[s] = 0;
-            q.add(s);
+        	distTo[s] = 0;
         }
-        while (!q.isEmpty()) {
-            int v = q.remove();
-            for (int w : G.adj(v)) {
-                if (!marked[w]) {
-                    edgeTo[w] = v;
-                    distTo[w] = distTo[v] + 1;
-                    marked[w] = true;
-                    q.add(w);
-                }
-            }
-        }
+        bfs.bfs(G, sources, this);
     }
+
+	@Override
+	public void processEdge(Graph g, int v, int w) {
+		if (!bfs.marked(w)) {
+			edgeTo[w] = v;
+			distTo[w] = distTo[v] + 1;
+		}
+	}
+
+	@Override
+	public void processVertex(Graph g, int s) {
+		// Do nothing
+	}
 
     /**
      * Is there a path between the source vertex {@code s} (or sources) and vertex {@code v}?
@@ -151,8 +117,8 @@ public class BreadthFirstPaths {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public boolean hasPathTo(int v) {
-        validateVertex(v);
-        return marked[v];
+        bfs.validateVertex(v);
+        return bfs.marked(v);
     }
 
     /**
@@ -164,7 +130,7 @@ public class BreadthFirstPaths {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int distTo(int v) {
-        validateVertex(v);
+        bfs.validateVertex(v);
         return distTo[v];
     }
 
@@ -176,7 +142,7 @@ public class BreadthFirstPaths {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public Iterable<Integer> pathTo(int v) {
-        validateVertex(v);
+        bfs.validateVertex(v);
         if (!hasPathTo(v)) return null;
         Deque<Integer> path = new ArrayDeque<>();
         int x;
@@ -184,32 +150,6 @@ public class BreadthFirstPaths {
             path.push(x);
         path.push(x);
         return path;
-    }
-
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
-    }
-
-    // throw an IllegalArgumentException if vertices is null, has zero vertices,
-    // or has a vertex not between 0 and V-1
-    private void validateVertices(Iterable<Integer> vertices) {
-        if (vertices == null) {
-            throw new IllegalArgumentException("argument is null");
-        }
-        int vertexCount = 0;
-        for (Integer v : vertices) {
-            vertexCount++;
-            if (v == null) {
-                throw new IllegalArgumentException("vertex is null");
-            }
-            validateVertex(v);
-        }
-        if (vertexCount == 0) {
-            throw new IllegalArgumentException("zero vertices");
-        }
     }
 
     /**
@@ -221,10 +161,11 @@ public class BreadthFirstPaths {
     public static void main(String[] args) throws FileNotFoundException {
         Scanner in = new Scanner(new File(args[0]));
         Graph G = new UndirectedGraph(in);
+        in.close();
         // System.out.println(G);
 
         int s = Integer.parseInt(args[1]);
-        BreadthFirstPaths bfs = new BreadthFirstPaths(G, s);
+        BFSPaths bfs = new BFSPaths(G, s);
 
         for (int v = 0; v < G.V(); v++) {
             if (bfs.hasPathTo(v)) {
@@ -240,6 +181,8 @@ public class BreadthFirstPaths {
                 System.out.printf("%d to %d (-):  not connected\n", s, v);
             }
         }
+        
+        // TODO do it again for a Digraph
     }
 }
 

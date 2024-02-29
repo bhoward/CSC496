@@ -29,7 +29,7 @@ import edu.depauw.algorithms.ArrayDeque;
  * The {@code NonrecDFS} class represents a data type for determining the
  * vertices connected to a given source vertex <em>s</em> in a graph. For
  * versions that find the paths, see {@link DFSPaths} and
- * {@link BreadthFirstPaths}.
+ * {@link BFSPaths}.
  * <p>
  * This implementation uses a nonrecursive version of depth-first search with an
  * explicit stack. See {@link RecDFS} for the classic recursive version. The
@@ -73,6 +73,7 @@ public class NonrecDFS extends DFS {
         strategy.visitPreorder(G, s);
         marked[s] = true;
         stack.push(new VIPair(s, G.adj(s).iterator()));
+        
         while (!stack.isEmpty() && !halt) {
             var p = stack.peek();
             if (p.it.hasNext()) {

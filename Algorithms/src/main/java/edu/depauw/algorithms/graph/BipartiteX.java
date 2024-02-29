@@ -25,7 +25,7 @@ import edu.depauw.algorithms.ArrayDeque;
  *  and <em>E</em> is the number of edges.
  *  Each instance method takes &Theta;(1) time.
  *  It uses &Theta;(<em>V</em>) extra space (not including the graph).
- *  See {@link Bipartite} for a recursive version that uses depth-first search.
+ *  See {@link DFSBipartite} for a recursive version that uses depth-first search.
  *  <p>
  *  For additional documentation,
  *  see <a href="https://algs4.cs.princeton.edu/41graph">Section 4.1</a>

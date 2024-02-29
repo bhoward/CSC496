@@ -1,39 +1,52 @@
-/******************************************************************************
- *  Compilation:  javac DepthFirstPaths.java
- *  Execution:    java DepthFirstPaths G s
- *  Dependencies: Graph.java Stack.java StdOut.java
- *  Data files:   https://algs4.cs.princeton.edu/41graph/tinyCG.txt
- *                https://algs4.cs.princeton.edu/41graph/tinyG.txt
- *                https://algs4.cs.princeton.edu/41graph/mediumG.txt
- *                https://algs4.cs.princeton.edu/41graph/largeG.txt
+/**
+ * Based on Sedgewick and Wayne,
+ * https://github.com/kevin-wayne/algs4/
  *
- *  Run depth-first search on an undirected graph.
+ *  % java DFSPaths tinyDG.txt 0
+ *  Undirected graph
+ *  3 to 0:  3-2-0
+ *  3 to 1:  3-2-0-1
+ *  3 to 2:  3-2
+ *  3 to 3:  3
+ *  3 to 4:  3-2-0-5-4
+ *  3 to 5:  3-2-0-5
+ *  3 to 6:  3-2-0-5-4-6
+ *  3 to 7:  3-2-0-5-4-6-7
+ *  3 to 8:  3-2-0-5-4-6-8
+ *  3 to 9:  3-2-0-5-4-6-7-9
+ *  3 to 10:  3-2-0-5-4-6-7-9-10
+ *  3 to 11:  3-2-0-5-4-6-7-9-10-12-11
+ *  3 to 12:  3-2-0-5-4-6-7-9-10-12
+ *  Directed graph
+ *  3 to 0:  3-2-0
+ *  3 to 1:  3-2-0-1
+ *  3 to 2:  3-2
+ *  3 to 3:  3
+ *  3 to 4:  3-2-0-5-4
+ *  3 to 5:  3-2-0-5
+ *  3 to 6:  not connected
+ *  3 to 7:  not connected
+ *  3 to 8:  not connected
+ *  3 to 9:  not connected
+ *  3 to 10:  not connected
+ *  3 to 11:  not connected
+ *  3 to 12:  not connected
  *
- *  %  java Graph tinyCG.txt
- *  6 8
- *  0: 2 1 5
- *  1: 0 2
- *  2: 0 1 3 4
- *  3: 5 4 2
- *  4: 3 2
- *  5: 3 0
- *
- *  % java DepthFirstPaths tinyCG.txt 0
- *  0 to 0:  0
- *  0 to 1:  0-2-1
- *  0 to 2:  0-2
- *  0 to 3:  0-2-3
- *  0 to 4:  0-2-3-4
- *  0 to 5:  0-2-3-5
- *
- ******************************************************************************/
+ */
 
 package edu.depauw.algorithms.graph;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Deque;
+import java.util.Scanner;
+
+import edu.depauw.algorithms.ArrayDeque;
+
 /**
- *  The {@code DepthFirstPaths} class represents a data type for finding
+ *  The {@code DFSPaths} class represents a data type for finding
  *  paths from a source vertex <em>s</em> to every other vertex
- *  in an undirected graph.
+ *  in a graph.
  *  <p>
  *  This implementation uses depth-first search.
  *  The constructor takes &Theta;(<em>V</em> + <em>E</em>) time in the
@@ -49,8 +62,8 @@ package edu.depauw.algorithms.graph;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class DepthFirstPaths {
-    private boolean[] marked;    // marked[v] = is there an s-v path?
+public class DFSPaths implements DFSClient {
+    private DFS dfs;
     private int[] edgeTo;        // edgeTo[v] = last edge on s-v path
     private final int s;         // source vertex
 
@@ -60,22 +73,28 @@ public class DepthFirstPaths {
      * @param s the source vertex
      * @throws IllegalArgumentException unless {@code 0 <= s < V}
      */
-    public DepthFirstPaths(Graph G, int s) {
+    public DFSPaths(Graph G, int s) {
+        dfs = new DFS(G);
         this.s = s;
         edgeTo = new int[G.V()];
-        marked = new boolean[G.V()];
-        validateVertex(s);
-        dfs(G, s);
+        dfs.validateVertex(s);
+        dfs.dfs(G, s, this);
     }
 
-    // depth first search from v
-    private void dfs(Graph G, int v) {
-        marked[v] = true;
-        for (int w : G.adj(v)) {
-            if (!marked[w]) {
-                edgeTo[w] = v;
-                dfs(G, w);
-            }
+    @Override
+    public void visitPreorder(Graph G, int v) {
+        // Do nothing
+    }
+
+    @Override
+    public void visitPostorder(Graph G, int v) {
+        // Do nothing
+    }
+
+    @Override
+    public void processEdge(Graph G, int v, int w) {
+        if (!dfs.marked(w)) {
+            edgeTo[w] = v;
         }
     }
 
@@ -86,8 +105,8 @@ public class DepthFirstPaths {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public boolean hasPathTo(int v) {
-        validateVertex(v);
-        return marked[v];
+        dfs.validateVertex(v);
+        return dfs.marked(v);
     }
 
     /**
@@ -99,50 +118,66 @@ public class DepthFirstPaths {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public Iterable<Integer> pathTo(int v) {
-        validateVertex(v);
+        dfs.validateVertex(v);
         if (!hasPathTo(v)) return null;
-        Stack<Integer> path = new Stack<Integer>();
+        Deque<Integer> path = new ArrayDeque<>();
         for (int x = v; x != s; x = edgeTo[x])
             path.push(x);
         path.push(s);
         return path;
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
-    }
-
     /**
      * Unit tests the {@code DepthFirstPaths} data type.
      *
      * @param args the command-line arguments
+     * @throws FileNotFoundException 
      */
-    public static void main(String[] args) {
-        In in = new In(args[0]);
-        Graph G = new Graph(in);
+    public static void main(String[] args) throws FileNotFoundException {
         int s = Integer.parseInt(args[1]);
-        DepthFirstPaths dfs = new DepthFirstPaths(G, s);
+        
+        System.out.println("Undirected graph");
+        Scanner in = new Scanner(new File(args[0]));
+        Graph G = new UndirectedGraph(in);
+        in.close();
+        
+        DFSPaths dfs = new DFSPaths(G, s);
 
         for (int v = 0; v < G.V(); v++) {
             if (dfs.hasPathTo(v)) {
-                StdOut.printf("%d to %d:  ", s, v);
+                System.out.printf("%d to %d:  ", s, v);
                 for (int x : dfs.pathTo(v)) {
-                    if (x == s) StdOut.print(x);
-                    else        StdOut.print("-" + x);
+                    if (x == s) System.out.print(x);
+                    else        System.out.print("-" + x);
                 }
-                StdOut.println();
+                System.out.println();
             }
 
             else {
-                StdOut.printf("%d to %d:  not connected\n", s, v);
+                System.out.printf("%d to %d:  not connected\n", s, v);
+            }
+        }
+        
+        System.out.println("Directed graph");
+        in = new Scanner(new File(args[0]));
+        G = new Digraph(in);
+        dfs = new DFSPaths(G, s);
+
+        for (int v = 0; v < G.V(); v++) {
+            if (dfs.hasPathTo(v)) {
+                System.out.printf("%d to %d:  ", s, v);
+                for (int x : dfs.pathTo(v)) {
+                    if (x == s) System.out.print(x);
+                    else        System.out.print("-" + x);
+                }
+                System.out.println();
             }
 
+            else {
+                System.out.printf("%d to %d:  not connected\n", s, v);
+            }
         }
     }
-
 }
 
 /******************************************************************************

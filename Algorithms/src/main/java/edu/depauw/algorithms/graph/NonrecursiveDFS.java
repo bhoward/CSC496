@@ -46,7 +46,7 @@ import java.util.Iterator;
  *  <p>
  *  This implementation uses a nonrecursive version of depth-first search
  *  with an explicit stack.
- *  See {@link DepthFirstSearch} for the classic recursive version.
+ *  See {@link DFSConnected} for the classic recursive version.
  *  The constructor takes &Theta;(<em>V</em> + <em>E</em>) time in the worst
  *  case, where <em>V</em> is the number of vertices and <em>E</em> is the
  *  number of edges.
@@ -129,7 +129,7 @@ public class NonrecursiveDFS {
      */
     public static void main(String[] args) {
         In in = new In(args[0]);
-        Graph G = new Graph(in);
+        Graph G = new UndirectedGraph(in);
         int s = Integer.parseInt(args[1]);
         NonrecursiveDFS dfs = new NonrecursiveDFS(G, s);
         for (int v = 0; v < G.V(); v++)

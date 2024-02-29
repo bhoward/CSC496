@@ -147,7 +147,7 @@ public class DirectedEulerianPath {
         if (deficit > 1) return false;
 
         // Condition 2: graph is connected, ignoring isolated vertices
-        Graph H = new Graph(G.V());
+        UndirectedGraph H = new UndirectedGraph(G.V());
         for (int v = 0; v < G.V(); v++)
             for (int w : G.adj(v))
                 H.addEdge(v, w);

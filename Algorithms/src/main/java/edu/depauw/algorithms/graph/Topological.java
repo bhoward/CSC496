@@ -68,7 +68,7 @@ public class Topological {
     public Topological(Digraph G) {
         DirectedCycle finder = new DirectedCycle(G);
         if (!finder.hasCycle()) {
-            DepthFirstOrder dfs = new DepthFirstOrder(G);
+            DFSOrder dfs = new DFSOrder(G);
             order = dfs.reversePost();
             rank = new int[G.V()];
             int i = 0;
@@ -85,7 +85,7 @@ public class Topological {
     public Topological(EdgeWeightedDigraph G) {
         EdgeWeightedDirectedCycle finder = new EdgeWeightedDirectedCycle(G);
         if (!finder.hasCycle()) {
-            DepthFirstOrder dfs = new DepthFirstOrder(G);
+            DFSOrder dfs = new DFSOrder(G);
             order = dfs.reversePost();
         }
     }

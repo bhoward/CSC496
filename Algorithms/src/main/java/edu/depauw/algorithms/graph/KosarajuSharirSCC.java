@@ -105,7 +105,7 @@ public class KosarajuSharirSCC {
     public KosarajuSharirSCC(Digraph G) {
 
         // compute reverse postorder of reverse graph
-        DepthFirstOrder dfs = new DepthFirstOrder(G.reverse());
+        DFSOrder dfs = new DFSOrder(G.reverse());
 
         // run DFS on G, using reverse postorder to guide calculation
         marked = new boolean[G.V()];

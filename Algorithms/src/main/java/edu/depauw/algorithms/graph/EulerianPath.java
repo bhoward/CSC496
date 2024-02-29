@@ -63,7 +63,7 @@ public class EulerianPath {
      *
      * @param G the graph
      */
-    public EulerianPath(Graph G) {
+    public EulerianPath(UndirectedGraph G) {
 
         // find vertex from which to start potential Eulerian path:
         // a vertex v with odd degree(v) if it exits;
@@ -158,7 +158,7 @@ public class EulerianPath {
 
 
     // returns any non-isolated vertex; -1 if no such vertex
-    private static int nonIsolatedVertex(Graph G) {
+    private static int nonIsolatedVertex(UndirectedGraph G) {
         for (int v = 0; v < G.V(); v++)
             if (G.degree(v) > 0)
                 return v;
@@ -177,7 +177,7 @@ public class EulerianPath {
     //    - degree(v) is even for every vertex, except for possibly two
     //    - the graph is connected (ignoring isolated vertices)
     // This method is solely for unit testing.
-    private static boolean satisfiesNecessaryAndSufficientConditions(Graph G) {
+    private static boolean satisfiesNecessaryAndSufficientConditions(UndirectedGraph G) {
         if (G.E() == 0) return true;
 
         // Condition 1: degree(v) is even except for possibly two
@@ -198,7 +198,7 @@ public class EulerianPath {
     }
 
     // check that solution is correct
-    private boolean certifySolution(Graph G) {
+    private boolean certifySolution(UndirectedGraph G) {
 
         // internal consistency check
         if (hasEulerianPath() == (path() == null)) return false;
@@ -219,7 +219,7 @@ public class EulerianPath {
     }
 
 
-    private static void unitTest(Graph G, String description) {
+    private static void unitTest(UndirectedGraph G, String description) {
         StdOut.println(description);
         StdOut.println("-------------------------------------");
         StdOut.print(G);
@@ -251,35 +251,35 @@ public class EulerianPath {
 
 
         // Eulerian cycle
-        Graph G1 = GraphGenerator.eulerianCycle(V, E);
+        UndirectedGraph G1 = GraphGenerator.eulerianCycle(V, E);
         unitTest(G1, "Eulerian cycle");
 
         // Eulerian path
-        Graph G2 = GraphGenerator.eulerianPath(V, E);
+        UndirectedGraph G2 = GraphGenerator.eulerianPath(V, E);
         unitTest(G2, "Eulerian path");
 
         // add one random edge
-        Graph G3 = new Graph(G2);
+        UndirectedGraph G3 = new UndirectedGraph(G2);
         G3.addEdge(StdRandom.uniformInt(V), StdRandom.uniformInt(V));
         unitTest(G3, "one random edge added to Eulerian path");
 
         // self loop
-        Graph G4 = new Graph(V);
+        UndirectedGraph G4 = new UndirectedGraph(V);
         int v4 = StdRandom.uniformInt(V);
         G4.addEdge(v4, v4);
         unitTest(G4, "single self loop");
 
         // single edge
-        Graph G5 = new Graph(V);
+        UndirectedGraph G5 = new UndirectedGraph(V);
         G5.addEdge(StdRandom.uniformInt(V), StdRandom.uniformInt(V));
         unitTest(G5, "single edge");
 
         // empty graph
-        Graph G6 = new Graph(V);
+        UndirectedGraph G6 = new UndirectedGraph(V);
         unitTest(G6, "empty graph");
 
         // random graph
-        Graph G7 = GraphGenerator.simple(V, E);
+        UndirectedGraph G7 = GraphGenerator.simple(V, E);
         unitTest(G7, "simple graph");
     }
 }

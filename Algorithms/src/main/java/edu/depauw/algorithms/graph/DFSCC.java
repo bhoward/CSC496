@@ -2,17 +2,17 @@
  * Based on Sedgewick and Wayne,
  * https://github.com/kevin-wayne/algs4/
  *
- *  % java CC tinyG.txt
+ *  % java DFSCC tinyG.txt
  *  3 components
  *  0 1 2 3 4 5 6
  *  7 8
  *  9 10 11 12
  *
- *  % java CC mediumG.txt
+ *  % java DFSCC mediumG.txt
  *  1 components
  *  0 1 2 3 4 5 6 7 8 9 10 ...
  *
- *  % java -Xss50m CC largeG.txt
+ *  % java -Xss50m DFSCC largeG.txt
  *  1 components
  *  0 1 2 3 4 5 6 7 8 9 10 ...
  *
@@ -30,7 +30,7 @@ import edu.depauw.algorithms.ArrayDeque;
 import edu.depauw.algorithms.ArrayList;
 
 /**
- *  The {@code CC} class represents a data type for
+ *  The {@code DFSCC} class represents a data type for
  *  determining the connected components in an undirected graph.
  *  The <em>id</em> operation determines in which connected component
  *  a given vertex lies; the <em>connected</em> operation
@@ -58,8 +58,8 @@ import edu.depauw.algorithms.ArrayList;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class CC {
-    private boolean[] marked;   // marked[v] = has vertex v been marked?
+public class DFSCC implements DFSClient {
+    private DFS dfs;
     private int[] id;           // id[v] = id of connected component containing v
     private int[] size;         // size[id] = number of vertices in given component
     private int count;          // number of connected components
@@ -69,60 +69,35 @@ public class CC {
      *
      * @param G the undirected graph
      */
-    public CC(Graph G) {
-        marked = new boolean[G.V()];
+    public DFSCC(UndirectedGraph G) {
+        dfs = new DFS(G);
         id = new int[G.V()];
         size = new int[G.V()];
+        count = 0;
+        
         for (int v = 0; v < G.V(); v++) {
-            if (!marked[v]) {
-                dfs(G, v);
+            if (!dfs.marked(v)) {
+                dfs.dfs(G, v, this);
                 count++;
             }
         }
     }
 
-    /**
-     * Computes the connected components of the edge-weighted graph {@code G}.
-     *
-     * @param G the edge-weighted graph
-     */
-    public CC(EdgeWeightedGraph G) {
-        marked = new boolean[G.V()];
-        id = new int[G.V()];
-        size = new int[G.V()];
-        for (int v = 0; v < G.V(); v++) {
-            if (!marked[v]) {
-                dfs(G, v);
-                count++;
-            }
-        }
-    }
-
-    // depth-first search for a Graph
-    private void dfs(Graph G, int v) {
-        marked[v] = true;
+    @Override
+    public void visitPreorder(Graph G, int v) {
         id[v] = count;
         size[count]++;
-        for (int w : G.adj(v)) {
-            if (!marked[w]) {
-                dfs(G, w);
-            }
-        }
     }
 
-    // depth-first search for an EdgeWeightedGraph
-    private void dfs(EdgeWeightedGraph G, int v) {
-        marked[v] = true;
-        id[v] = count;
-        size[count]++;
-        for (Edge e : G.adj(v)) {
-            int w = e.other(v);
-            if (!marked[w]) {
-                dfs(G, w);
-            }
-        }
+    @Override
+    public void visitPostorder(Graph G, int v) {
+        // Do nothing
     }
 
+    @Override
+    public void processEdge(Graph G, int v, int w) {
+        // Do nothing
+    }
 
     /**
      * Returns the component id of the connected component containing vertex {@code v}.
@@ -132,7 +107,7 @@ public class CC {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int id(int v) {
-        validateVertex(v);
+        dfs.validateVertex(v);
         return id[v];
     }
 
@@ -144,7 +119,7 @@ public class CC {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int size(int v) {
-        validateVertex(v);
+        dfs.validateVertex(v);
         return size[id[v]];
     }
 
@@ -169,28 +144,21 @@ public class CC {
      * @throws IllegalArgumentException unless {@code 0 <= w < V}
      */
     public boolean connected(int v, int w) {
-        validateVertex(v);
-        validateVertex(w);
+        dfs.validateVertex(v);
+        dfs.validateVertex(w);
         return id(v) == id(w);
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
-    }
-
     /**
-     * Unit tests the {@code CC} data type.
+     * Unit tests the {@code DFSCC} data type.
      *
      * @param args the command-line arguments
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
         Scanner in = new Scanner(new File(args[0]));
-        Graph G = new Graph(in);
-        CC cc = new CC(G);
+        UndirectedGraph G = new UndirectedGraph(in);
+        DFSCC cc = new DFSCC(G);
 
         // number of connected components
         int m = cc.count();

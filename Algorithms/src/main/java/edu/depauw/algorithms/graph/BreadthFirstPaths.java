@@ -220,7 +220,7 @@ public class BreadthFirstPaths {
      */
     public static void main(String[] args) throws FileNotFoundException {
         Scanner in = new Scanner(new File(args[0]));
-        Graph G = new Graph(in);
+        Graph G = new UndirectedGraph(in);
         // System.out.println(G);
 
         int s = Integer.parseInt(args[1]);

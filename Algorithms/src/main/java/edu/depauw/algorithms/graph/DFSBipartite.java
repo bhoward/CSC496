@@ -135,6 +135,7 @@ public class DFSBipartite implements DFSClient {
     public static void main(String[] args) throws FileNotFoundException {
         Scanner in = new Scanner(new File(args[0]));
         UndirectedGraph G = new UndirectedGraph(in);
+        in.close();
 //        System.out.println(G);
 
         DFSBipartite b = new DFSBipartite(G);

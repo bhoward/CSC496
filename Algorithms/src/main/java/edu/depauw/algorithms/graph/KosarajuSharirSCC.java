@@ -1,15 +1,6 @@
-/******************************************************************************
- *  Compilation:  javac KosarajuSharirSCC.java
- *  Execution:    java KosarajuSharirSCC filename.txt
- *  Dependencies: Digraph.java TransitiveClosure.java StdOut.java In.java
- *  Data files:   https://algs4.cs.princeton.edu/42digraph/tinyDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/mediumDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/largeDG.txt
- *
- *  Compute the strongly-connected components of a digraph using the
- *  Kosaraju-Sharir algorithm.
- *
- *  Runs in O(E + V) time.
+/**
+ * Based on Sedgewick and Wayne,
+ * https://github.com/kevin-wayne/algs4/
  *
  *  % java KosarajuSharirSCC tinyDG.txt
  *  5 strong components
@@ -23,16 +14,16 @@
  *  10 strong components
  *  21
  *  2 5 6 8 9 11 12 13 15 16 18 19 22 23 25 26 28 29 30 31 32 33 34 35 37 38 39 40 42 43 44 46 47 48 49
- *  14
- *  3 4 17 20 24 27 36
  *  41
  *  7
+ *  3 4 17 20 24 27 36
+ *  14
  *  45
  *  1
  *  0
  *  10
  *
- *  % java -Xss50m KosarajuSharirSCC mediumDG.txt
+ *  % java KosarajuSharirSCC largeDG.txt
  *  25 strong components
  *  7 11 32 36 61 84 95 116 121 128 230   ...
  *  28 73 80 104 115 143 149 164 184 185  ...
@@ -64,6 +55,13 @@
 
 package edu.depauw.algorithms.graph;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.Scanner;
+
+import edu.depauw.algorithms.ArrayList;
+
 /**
  *  The {@code KosarajuSharirSCC} class represents a data type for
  *  determining the strong components in a digraph.
@@ -93,8 +91,8 @@ package edu.depauw.algorithms.graph;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class KosarajuSharirSCC {
-    private boolean[] marked;     // marked[v] = has vertex v been visited?
+public class KosarajuSharirSCC implements DFSClient {
+    private DFS dfs;
     private int[] id;             // id[v] = id of strong component containing v
     private int count;            // number of strongly-connected components
 
@@ -103,31 +101,33 @@ public class KosarajuSharirSCC {
      * @param G the digraph
      */
     public KosarajuSharirSCC(Digraph G) {
-
         // compute reverse postorder of reverse graph
-        DFSOrder dfs = new DFSOrder(G.reverse());
+        Iterable<Integer> post = new DFSOrder(G.reverse()).reversePost();
 
         // run DFS on G, using reverse postorder to guide calculation
-        marked = new boolean[G.V()];
+        dfs = new NonrecDFS(G);
         id = new int[G.V()];
-        for (int v : dfs.reversePost()) {
-            if (!marked[v]) {
-                dfs(G, v);
+        for (int v : post) {
+            if (!dfs.marked(v)) {
+                dfs.dfs(G, v, this);
                 count++;
             }
         }
-
-        // check that id[] gives strong components
-        assert check(G);
     }
 
-    // DFS on graph G
-    private void dfs(Digraph G, int v) {
-        marked[v] = true;
+    @Override
+    public void visitPreorder(Graph G, int v) {
         id[v] = count;
-        for (int w : G.adj(v)) {
-            if (!marked[w]) dfs(G, w);
-        }
+    }
+
+    @Override
+    public void visitPostorder(Graph G, int v) {
+        // Do nothing
+    }
+
+    @Override
+    public void processEdge(Graph G, int v, int w) {
+        // Do nothing
     }
 
     /**
@@ -148,8 +148,8 @@ public class KosarajuSharirSCC {
      * @throws IllegalArgumentException unless {@code 0 <= w < V}
      */
     public boolean stronglyConnected(int v, int w) {
-        validateVertex(v);
-        validateVertex(w);
+        dfs.validateVertex(v);
+        dfs.validateVertex(w);
         return id[v] == id[w];
     }
 
@@ -160,62 +160,43 @@ public class KosarajuSharirSCC {
      * @throws IllegalArgumentException unless {@code 0 <= s < V}
      */
     public int id(int v) {
-        validateVertex(v);
+        dfs.validateVertex(v);
         return id[v];
-    }
-
-    // does the id[] array contain the strongly connected components?
-    private boolean check(Digraph G) {
-        TransitiveClosure tc = new TransitiveClosure(G);
-        for (int v = 0; v < G.V(); v++) {
-            for (int w = 0; w < G.V(); w++) {
-                if (stronglyConnected(v, w) != (tc.reachable(v, w) && tc.reachable(w, v)))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
     }
 
     /**
      * Unit tests the {@code KosarajuSharirSCC} data type.
      *
      * @param args the command-line arguments
+     * @throws FileNotFoundException 
      */
-    public static void main(String[] args) {
-        In in = new In(args[0]);
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner in = new Scanner(new File(args[0]));
         Digraph G = new Digraph(in);
+        in.close();
         KosarajuSharirSCC scc = new KosarajuSharirSCC(G);
 
         // number of connected components
         int m = scc.count();
-        StdOut.println(m + " strong components");
+        System.out.println(m + " strong components");
 
         // compute list of vertices in each strong component
-        Queue<Integer>[] components = (Queue<Integer>[]) new Queue[m];
+        List<List<Integer>> components = new ArrayList<>(m);
         for (int i = 0; i < m; i++) {
-            components[i] = new Queue<Integer>();
+            components.add(i, new ArrayList<>());
         }
         for (int v = 0; v < G.V(); v++) {
-            components[scc.id(v)].enqueue(v);
+            components.get(scc.id(v)).add(v);
         }
 
         // print results
         for (int i = 0; i < m; i++) {
-            for (int v : components[i]) {
-                StdOut.print(v + " ");
+            for (int v : components.get(i)) {
+                System.out.print(v + " ");
             }
-            StdOut.println();
+            System.out.println();
         }
-
     }
-
 }
 
 /******************************************************************************

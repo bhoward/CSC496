@@ -66,7 +66,7 @@ public class DFSOrder implements DFSClient {
      * @param G the digraph
      */
     public DFSOrder(Digraph G) {
-        dfs = new RecDFS(G);
+        dfs = new NonrecDFS(G);
         pre    = new int[G.V()];
         post   = new int[G.V()];
         postorder = new ArrayDeque<Integer>();

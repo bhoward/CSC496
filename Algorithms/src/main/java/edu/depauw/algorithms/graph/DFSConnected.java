@@ -53,7 +53,7 @@ public class DFSConnected implements DFSClient {
      * @throws IllegalArgumentException unless {@code 0 <= s < V}
      */
     public DFSConnected(Graph G, int s) {
-        dfs = new DFS(G);
+        dfs = new RecDFS(G);
         dfs.validateVertex(s);
         dfs.dfs(G, s, this);
     }
@@ -69,7 +69,7 @@ public class DFSConnected implements DFSClient {
      *         for each vertex {@code s} in {@code sources}
      */
     public DFSConnected(Graph G, Iterable<Integer> sources) {
-        dfs = new DFS(G);
+        dfs = new RecDFS(G);
         dfs.validateVertices(sources);
         for (int v : sources) {
             if (!dfs.marked(v)) dfs.dfs(G, v, this);

@@ -35,8 +35,8 @@ import edu.depauw.algorithms.ArrayDeque;
 
 /**
  *  The {@code DFSOrder} class represents a data type for
- *  determining depth-first search ordering of the vertices in a digraph
- *  or edge-weighted digraph, including preorder, postorder, and reverse postorder.
+ *  determining depth-first search ordering of the vertices in a digraph,
+ *  including preorder, postorder, and reverse postorder.
  *  <p>
  *  This implementation uses depth-first search.
  *  Each constructor takes &Theta;(<em>V</em> + <em>E</em>) time,
@@ -66,7 +66,7 @@ public class DFSOrder implements DFSClient {
      * @param G the digraph
      */
     public DFSOrder(Digraph G) {
-        dfs = new DFS(G);
+        dfs = new RecDFS(G);
         pre    = new int[G.V()];
         post   = new int[G.V()];
         postorder = new ArrayDeque<Integer>();
@@ -147,6 +147,7 @@ public class DFSOrder implements DFSClient {
     public static void main(String[] args) throws FileNotFoundException {
         Scanner in = new Scanner(new File(args[0]));
         Digraph G = new Digraph(in);
+        in.close();
 
         DFSOrder dfs = new DFSOrder(G);
         System.out.println("   v  pre post");

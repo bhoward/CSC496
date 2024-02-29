@@ -2,7 +2,7 @@
  * Based on Sedgewick and Wayne,
  * https://github.com/kevin-wayne/algs4/
  *
- *  % java DFSPaths tinyDG.txt 0
+ *  % java DFSPaths tinyDG.txt 3
  *  Undirected graph
  *  3 to 0:  3-2-0
  *  3 to 1:  3-2-0-1
@@ -74,7 +74,7 @@ public class DFSPaths implements DFSClient {
      * @throws IllegalArgumentException unless {@code 0 <= s < V}
      */
     public DFSPaths(Graph G, int s) {
-        dfs = new DFS(G);
+        dfs = new RecDFS(G);
         this.s = s;
         edgeTo = new int[G.V()];
         dfs.validateVertex(s);
@@ -161,6 +161,8 @@ public class DFSPaths implements DFSClient {
         System.out.println("Directed graph");
         in = new Scanner(new File(args[0]));
         G = new Digraph(in);
+        in.close();
+        
         dfs = new DFSPaths(G, s);
 
         for (int v = 0; v < G.V(); v++) {

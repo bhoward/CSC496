@@ -25,7 +25,7 @@ package edu.depauw.algorithms.graph;
  *  Each instance method takes &Theta;(1) time.
  *  It uses &Theta;(<em>V</em>) extra space (not including the digraph).
  *  <p>
- *  See {@link DirectedCycle}, {@link DirectedCycleX}, and
+ *  See {@link DFSDirectedCycle}, {@link DirectedCycleX}, and
  *  {@link EdgeWeightedDirectedCycle} to compute a
  *  directed cycle if the digraph is not a DAG.
  *  See {@link Topological} for a recursive version that uses depth-first search.

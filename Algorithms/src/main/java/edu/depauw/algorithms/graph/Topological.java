@@ -43,7 +43,7 @@ package edu.depauw.algorithms.graph;
  *  Each instance method takes &Theta;(1) time.
  *  It uses &Theta;(<em>V</em>) extra space (not including the digraph).
  *  <p>
- *  See {@link DirectedCycle}, {@link DirectedCycleX}, and
+ *  See {@link DFSDirectedCycle}, {@link DirectedCycleX}, and
  *  {@link EdgeWeightedDirectedCycle} for computing a directed cycle
  *  if the digraph is not a DAG.
  *  See {@link TopologicalX} for a nonrecursive queue-based algorithm
@@ -66,7 +66,7 @@ public class Topological {
      * @param G the digraph
      */
     public Topological(Digraph G) {
-        DirectedCycle finder = new DirectedCycle(G);
+        DFSDirectedCycle finder = new DFSDirectedCycle(G);
         if (!finder.hasCycle()) {
             DFSOrder dfs = new DFSOrder(G);
             order = dfs.reversePost();

@@ -48,13 +48,13 @@ public class DFSBipartite implements DFSClient {
      * @param G the graph
      */
     public DFSBipartite(UndirectedGraph G) {
-        dfs = new DFS(G);
+        dfs = new RecDFS(G);
         isBipartite = true;
         color = new boolean[G.V()];
         edgeTo = new int[G.V()];
 
         for (int v = 0; v < G.V(); v++) {
-            if (!dfs.marked(v)) {
+            if (!dfs.marked(v) && !dfs.halted()) {
                 dfs.dfs(G, v, this);
             }
         }

@@ -24,7 +24,7 @@ import edu.depauw.algorithms.ArrayDeque;
  * &Theta;(<em>V</em> + <em>E</em>) time in the worst case, where <em>V</em> is
  * the number of vertices and <em>E</em> is the number of edges. Each instance
  * method takes &Theta;(1) time. It uses &Theta;(<em>V</em>) extra space (not
- * including the graph). See {@link BipartiteX} for a nonrecursive version that
+ * including the graph). See {@link BFSBipartite} for a nonrecursive version that
  * uses breadth-first search.
  * <p>
  * For additional documentation, see
@@ -55,6 +55,7 @@ public class DFSBipartite implements DFSClient {
 
         for (int v = 0; v < G.V(); v++) {
             if (!dfs.marked(v) && !dfs.halted()) {
+            	color[v] = false;
                 dfs.dfs(G, v, this);
             }
         }

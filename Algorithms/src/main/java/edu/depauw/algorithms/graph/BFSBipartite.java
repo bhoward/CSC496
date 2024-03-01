@@ -5,7 +5,10 @@
 
 package edu.depauw.algorithms.graph;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Deque;
+import java.util.Scanner;
 
 import edu.depauw.algorithms.ArrayDeque;
 
@@ -34,10 +37,10 @@ import edu.depauw.algorithms.ArrayDeque;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class BipartiteX {
+public class BFSBipartite implements BFSClient {
+	private BFS bfs;
     private boolean isBipartite;   // is the graph bipartite?
     private boolean[] color;       // color[v] gives vertices on one side of bipartition
-    private boolean[] marked;      // marked[v] = true iff v has been visited in DFS
     private int[] edgeTo;          // edgeTo[v] = last edge on path to v
     private Deque<Integer> cycle;  // odd-length cycle
 
@@ -47,59 +50,54 @@ public class BipartiteX {
      *
      * @param  G the graph
      */
-    public BipartiteX(Graph G) {
+    public BFSBipartite(UndirectedGraph G) {
+    	bfs = new BFS(G);
         isBipartite = true;
         color  = new boolean[G.V()];
-        marked = new boolean[G.V()];
         edgeTo = new int[G.V()];
 
-        for (int v = 0; v < G.V() && isBipartite; v++) {
-            if (!marked[v]) {
-                bfs(G, v);
+        for (int v = 0; v < G.V(); v++) {
+            if (!bfs.marked(v) && !bfs.halted()) {
+            	color[v] = false;
+                bfs.bfs(G, v, this);
             }
         }
     }
 
-    private void bfs(Graph G, int s) {
-        Deque<Integer> q = new ArrayDeque<>();
-        color[s] = false;
-        marked[s] = true;
-        q.add(s);
+	@Override
+	public void processEdge(Graph g, int v, int w) {
+		if (!bfs.marked(w)) {
+			edgeTo[w] = v;
+			color[w] = !color[v];
+		} else if (color[w] == color[v]) {
+            isBipartite = false;
 
-        while (!q.isEmpty()) {
-            int v = q.remove();
-            for (int w : G.adj(v)) {
-                if (!marked[w]) {
-                    marked[w] = true;
-                    edgeTo[w] = v;
-                    color[w] = !color[v];
-                    q.add(w);
-                }
-                else if (color[w] == color[v]) {
-                    isBipartite = false;
-
-                    // to form odd cycle, consider s-v path and s-w path
-                    // and let x be closest node to v and w common to two paths
-                    // then (w-x path) + (x-v path) + (edge v-w) is an odd-length cycle
-                    // Note: distTo[v] == distTo[w];
-                    cycle = new ArrayDeque<>();
-                    Deque<Integer> stack = new ArrayDeque<>();
-                    int x = v, y = w;
-                    while (x != y) {
-                        stack.push(x);
-                        cycle.add(y);
-                        x = edgeTo[x];
-                        y = edgeTo[y];
-                    }
-                    stack.push(x);
-                    while (!stack.isEmpty())
-                        cycle.add(stack.pop());
-                    cycle.add(w);
-                    return;
-                }
+            // to form odd cycle, consider s-v path and s-w path
+            // and let x be closest node to v and w common to two paths
+            // then (w-x path) + (x-v path) + (edge v-w) is an odd-length cycle
+            // Note: distTo[v] == distTo[w];
+            cycle = new ArrayDeque<>();
+            Deque<Integer> stack = new ArrayDeque<>();
+            int x = v, y = w;
+            while (x != y) {
+                stack.push(x);
+                cycle.add(y);
+                x = edgeTo[x];
+                y = edgeTo[y];
             }
-        }
-    }
+            stack.push(x);
+            while (!stack.isEmpty())
+                cycle.add(stack.pop());
+            cycle.add(w);
+            
+            bfs.halt();
+		}
+	}
+
+	@Override
+	public void processVertex(Graph g, int s) {
+		// Do nothing
+	}
 
     /**
      * Returns true if the graph is bipartite.
@@ -122,7 +120,7 @@ public class BipartiteX {
      *         is not bipartite
      */
     public boolean color(int v) {
-        validateVertex(v);
+        bfs.validateVertex(v);
         if (!isBipartite)
             throw new UnsupportedOperationException("Graph is not bipartite");
         return color[v];
@@ -141,11 +139,31 @@ public class BipartiteX {
         return cycle;
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
+    /**
+     * Unit tests the {@code BFSBipartite} data type.
+     *
+     * @param args the command-line arguments
+     * @throws FileNotFoundException
+     */
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner in = new Scanner(new File(args[0]));
+        UndirectedGraph G = new UndirectedGraph(in);
+        in.close();
+//        System.out.println(G);
+
+        BFSBipartite b = new BFSBipartite(G);
+        if (b.isBipartite()) {
+            System.out.println("Graph is bipartite");
+            for (int v = 0; v < G.V(); v++) {
+                System.out.println(v + ": " + b.color(v));
+            }
+        } else {
+            System.out.print("Graph has an odd-length cycle: ");
+            for (int x : b.oddCycle()) {
+                System.out.print(x + " ");
+            }
+            System.out.println();
+        }
     }
 }
 

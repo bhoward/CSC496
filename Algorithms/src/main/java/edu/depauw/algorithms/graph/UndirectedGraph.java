@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 import edu.depauw.algorithms.ArrayList;
 import edu.depauw.algorithms.Bag;
-import edu.depauw.algorithms.TreeBag;
+import edu.depauw.algorithms.MapBag;
 
 /**
  *  The {@code UndirectedGraph} class represents an undirected graph of vertices
@@ -65,7 +65,7 @@ public class UndirectedGraph implements Graph {
         this.E = 0;
         adj = new ArrayList<>();
         for (int v = 0; v < V; v++) {
-            adj.add(v, new TreeBag<>());
+            adj.add(v, new MapBag<>());
         }
     }
 
@@ -88,7 +88,7 @@ public class UndirectedGraph implements Graph {
             if (V < 0) throw new IllegalArgumentException("number of vertices in a Graph must be non-negative");
             adj = new ArrayList<>(V);
             for (int v = 0; v < V; v++) {
-                adj.add(v, new TreeBag<>());
+                adj.add(v, new MapBag<>());
             }
             int E = in.nextInt();
             if (E < 0) throw new IllegalArgumentException("number of edges in a Graph must be non-negative");
@@ -117,7 +117,7 @@ public class UndirectedGraph implements Graph {
         // update adjacency lists
         adj = new ArrayList<>(V);
         for (int v = 0; v < V; v++) {
-            adj.add(v, new TreeBag<>());
+            adj.add(v, new MapBag<>());
         }
 
         for (int v = 0; v < G.V(); v++) {

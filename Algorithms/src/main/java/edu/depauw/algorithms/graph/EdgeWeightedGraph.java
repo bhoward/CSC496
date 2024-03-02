@@ -25,7 +25,7 @@ import java.util.Scanner;
 
 import edu.depauw.algorithms.ArrayList;
 import edu.depauw.algorithms.Bag;
-import edu.depauw.algorithms.TreeBag;
+import edu.depauw.algorithms.MapBag;
 
 /**
  *  The {@code EdgeWeightedGraph} class represents an edge-weighted
@@ -78,7 +78,7 @@ public class EdgeWeightedGraph {
         this.E = 0;
         adj = new ArrayList<>(V);
         for (int v = 0; v < V; v++) {
-            adj.add(v, new TreeBag<>());
+            adj.add(v, new MapBag<>());
         }
     }
 
@@ -101,7 +101,7 @@ public class EdgeWeightedGraph {
             V = in.nextInt();
             adj = new ArrayList<>(V);
             for (int v = 0; v < V; v++) {
-                adj.add(v, new TreeBag<>());
+                adj.add(v, new MapBag<>());
             }
 
             int E = in.nextInt();
@@ -208,7 +208,7 @@ public class EdgeWeightedGraph {
      * @return all edges in this edge-weighted graph, as an iterable
      */
     public Iterable<Edge> edges() {
-        Bag<Edge> list = new TreeBag<Edge>();
+        Bag<Edge> list = new MapBag<Edge>();
         for (int v = 0; v < V; v++) {
             int selfLoops = 0;
             for (Edge e : adj(v)) {

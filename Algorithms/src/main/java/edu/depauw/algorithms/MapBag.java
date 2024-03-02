@@ -1,12 +1,20 @@
 package edu.depauw.algorithms;
 
 import java.util.Iterator;
+import java.util.Map;
 
-public class TreeBag<E> implements Bag<E> {
-    private TreeMap<E, Integer> map;
+/**
+ * One way to implement a {@link Bag} is to use a {@link Map} that maps each
+ * element to the number of times it has been added.  This particular version
+ * uses a {@link TreeMap}, but it could just as well use a {@code HashMap}.
+ * 
+ * @param <E>
+ */
+public class MapBag<E> implements Bag<E> {
+    private Map<E, Integer> map;
     private int size;
-    
-    public TreeBag() {
+
+    public MapBag() {
         this.map = new TreeMap<>();
         this.size = 0;
     }
@@ -28,7 +36,7 @@ public class TreeBag<E> implements Bag<E> {
 
     @Override
     public Iterator<E> iterator() {
-        return new TreeBagIterator();
+        return new MapBagIterator();
     }
 
     @Override
@@ -79,15 +87,15 @@ public class TreeBag<E> implements Bag<E> {
         map.clear();
     }
 
-    private class TreeBagIterator implements Iterator<E> {
+    private class MapBagIterator implements Iterator<E> {
         private Iterator<E> it;
         private E current;
         private int n;
         private int count;
         private int total;
 
-        public TreeBagIterator() {
-            this.it = map.keyIterator();
+        public MapBagIterator() {
+            this.it = map.keySet().iterator();
             this.current = (it.hasNext()) ? it.next() : null;
             this.n = (current != null) ? map.get(current) : 0;
             this.count = 0;

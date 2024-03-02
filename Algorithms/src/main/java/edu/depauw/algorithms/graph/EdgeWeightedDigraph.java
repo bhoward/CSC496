@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 import edu.depauw.algorithms.ArrayList;
 import edu.depauw.algorithms.Bag;
-import edu.depauw.algorithms.TreeBag;
+import edu.depauw.algorithms.MapBag;
 
 /**
  *  The {@code EdgeWeightedDigraph} class represents an edge-weighted
@@ -66,7 +66,7 @@ public class EdgeWeightedDigraph {
         this.indegree = new int[V];
         adj = new ArrayList<>(V);
         for (int v = 0; v < V; v++)
-            adj.add(v, new TreeBag<>());
+            adj.add(v, new MapBag<>());
     }
 
     /**
@@ -89,7 +89,7 @@ public class EdgeWeightedDigraph {
             indegree = new int[V];
             adj = new ArrayList<>(V);
             for (int v = 0; v < V; v++) {
-                adj.add(v, new TreeBag<>());
+                adj.add(v, new MapBag<>());
             }
 
             int E = in.nextInt();
@@ -211,7 +211,7 @@ public class EdgeWeightedDigraph {
      * @return all edges in this edge-weighted digraph, as an iterable
      */
     public Iterable<DirectedEdge> edges() {
-        Bag<DirectedEdge> list = new TreeBag<>();
+        Bag<DirectedEdge> list = new MapBag<>();
         for (int v = 0; v < V; v++) {
             list.addAll(adj.get(v));
         }

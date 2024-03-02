@@ -18,7 +18,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import edu.depauw.algorithms.Bag;
-import edu.depauw.algorithms.TreeBag;
+import edu.depauw.algorithms.MapBag;
 
 /**
  *  The {@code DFSConnected} class represents a data type for
@@ -117,7 +117,7 @@ public class DFSConnected implements DFSClient {
      */
     public static void main(String[] args) throws FileNotFoundException {
         // read in sources from command-line arguments
-        Bag<Integer> sources = new TreeBag<>();
+        Bag<Integer> sources = new MapBag<>();
         for (int i = 1; i < args.length; i++) {
             int s = Integer.parseInt(args[i]);
             sources.add(s);

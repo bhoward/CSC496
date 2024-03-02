@@ -54,7 +54,7 @@ public class DFSDirectedCycle implements DFSClient {
      * @param G the digraph
      */
     public DFSDirectedCycle(Digraph G) {
-        dfs = new RecDFS(G);
+        dfs = new NonrecDFS(G);
         onStack = new boolean[G.V()];
         edgeTo = new int[G.V()];
         for (int v = 0; v < G.V(); v++)

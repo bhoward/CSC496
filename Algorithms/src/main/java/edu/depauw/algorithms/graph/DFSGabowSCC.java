@@ -1,17 +1,8 @@
-/******************************************************************************
- *  Compilation:  javac GabowSCC.java
- *  Execution:    java GabowSCC V E
- *  Dependencies: Digraph.java Stack.java TransitiveClosure.java StdOut.java
- *  Data files:   https://algs4.cs.princeton.edu/42digraph/tinyDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/mediumDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/largeDG.txt
+/**
+ * Based on Sedgewick and Wayne,
+ * https://github.com/kevin-wayne/algs4/
  *
- *  Compute the strongly-connected components of a digraph using
- *  Gabow's algorithm (aka Cheriyan-Mehlhorn algorithm).
- *
- *  Runs in O(E + V) time.
- *
- *  % java GabowSCC tinyDG.txt
+ *  % java DFSGabowSCC tinyDG.txt
  *  5 components
  *  1
  *  0 2 3 4 5
@@ -22,8 +13,18 @@
  ******************************************************************************/
 
 package edu.depauw.algorithms.graph;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Deque;
+import java.util.List;
+import java.util.Scanner;
+
+import edu.depauw.algorithms.ArrayDeque;
+import edu.depauw.algorithms.ArrayList;
+
 /**
- *  The {@code GabowSCC} class represents a data type for
+ *  The {@code DFSGabowSCC} class represents a data type for
  *  determining the strong components in a digraph.
  *  The <em>id</em> operation determines in which strong component
  *  a given vertex lies; the <em>areStronglyConnected</em> operation
@@ -43,7 +44,7 @@ package edu.depauw.algorithms.graph;
  *  Each instance method takes &Theta;(1) time.
  *  It uses &Theta;(<em>V</em>) extra space (not including the digraph).
  *  For alternative implementations of the same API, see
- *  {@link KosarajuSharirSCC} and {@link TarjanSCC}.
+ *  {@link DFSKosarajuSharirSCC} and {@link DFSTarjanSCC}.
  *  <p>
  *  For additional documentation,
  *  see <a href="https://algs4.cs.princeton.edu/42digraph">Section 4.2</a> of
@@ -52,51 +53,43 @@ package edu.depauw.algorithms.graph;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class GabowSCC {
-
-    private boolean[] marked;        // marked[v] = has v been visited?
+public class DFSGabowSCC implements DFSClient {
+    private DFS dfs;
     private int[] id;                // id[v] = id of strong component containing v
     private int[] preorder;          // preorder[v] = preorder of v
     private int pre;                 // preorder number counter
     private int count;               // number of strongly-connected components
-    private Stack<Integer> stack1;
-    private Stack<Integer> stack2;
+    private Deque<Integer> stack1;
+    private Deque<Integer> stack2;
 
 
     /**
      * Computes the strong components of the digraph {@code G}.
      * @param G the digraph
      */
-    public GabowSCC(Digraph G) {
-        marked = new boolean[G.V()];
-        stack1 = new Stack<Integer>();
-        stack2 = new Stack<Integer>();
+    public DFSGabowSCC(Digraph G) {
+        dfs = new NonrecDFS(G);
+        stack1 = new ArrayDeque<>();
+        stack2 = new ArrayDeque<>();
         id = new int[G.V()];
         preorder = new int[G.V()];
         for (int v = 0; v < G.V(); v++)
             id[v] = -1;
 
         for (int v = 0; v < G.V(); v++) {
-            if (!marked[v]) dfs(G, v);
+            if (!dfs.marked(v)) dfs.dfs(G, v, this);
         }
-
-        // check that id[] gives strong components
-        assert check(G);
     }
 
-    private void dfs(Digraph G, int v) {
-        marked[v] = true;
+    @Override
+    public void visitPreorder(Graph G, int v) {
         preorder[v] = pre++;
         stack1.push(v);
         stack2.push(v);
-        for (int w : G.adj(v)) {
-            if (!marked[w]) dfs(G, w);
-            else if (id[w] == -1) {
-                while (preorder[stack2.peek()] > preorder[w])
-                    stack2.pop();
-            }
-        }
+    }
 
+    @Override
+    public void visitPostorder(Graph G, int v) {
         // found strong component containing v
         if (stack2.peek() == v) {
             stack2.pop();
@@ -106,6 +99,14 @@ public class GabowSCC {
                 id[w] = count;
             } while (w != v);
             count++;
+        }
+    }
+
+    @Override
+    public void processEdge(Graph G, int v, int w) {
+        if (dfs.marked(w) && id[w] == -1) {
+            while (preorder[stack2.peek()] > preorder[w])
+                stack2.pop();
         }
     }
 
@@ -127,8 +128,8 @@ public class GabowSCC {
      * @throws IllegalArgumentException unless {@code 0 <= w < V}
      */
     public boolean stronglyConnected(int v, int w) {
-        validateVertex(v);
-        validateVertex(w);
+        dfs.validateVertex(v);
+        dfs.validateVertex(w);
         return id[v] == id[w];
     }
 
@@ -139,27 +140,8 @@ public class GabowSCC {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int id(int v) {
-        validateVertex(v);
+        dfs.validateVertex(v);
         return id[v];
-    }
-
-    // does the id[] array contain the strongly connected components?
-    private boolean check(Digraph G) {
-        TransitiveClosure tc = new TransitiveClosure(G);
-        for (int v = 0; v < G.V(); v++) {
-            for (int w = 0; w < G.V(); w++) {
-                if (stronglyConnected(v, w) != (tc.reachable(v, w) && tc.reachable(w, v)))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
     }
 
     /**
@@ -167,34 +149,33 @@ public class GabowSCC {
      *
      * @param args the command-line arguments
      */
-    public static void main(String[] args) {
-        In in = new In(args[0]);
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner in = new Scanner(new File(args[0]));
         Digraph G = new Digraph(in);
-        GabowSCC scc = new GabowSCC(G);
+        in.close();
+        DFSGabowSCC scc = new DFSGabowSCC(G);
 
         // number of connected components
         int m = scc.count();
-        StdOut.println(m + " components");
+        System.out.println(m + " strong components");
 
         // compute list of vertices in each strong component
-        Queue<Integer>[] components = (Queue<Integer>[]) new Queue[m];
+        List<List<Integer>> components = new ArrayList<>(m);
         for (int i = 0; i < m; i++) {
-            components[i] = new Queue<Integer>();
+            components.add(i, new ArrayList<>());
         }
         for (int v = 0; v < G.V(); v++) {
-            components[scc.id(v)].enqueue(v);
+            components.get(scc.id(v)).add(v);
         }
 
         // print results
         for (int i = 0; i < m; i++) {
-            for (int v : components[i]) {
-                StdOut.print(v + " ");
+            for (int v : components.get(i)) {
+                System.out.print(v + " ");
             }
-            StdOut.println();
+            System.out.println();
         }
-
     }
-
 }
 
 /******************************************************************************

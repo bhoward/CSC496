@@ -70,7 +70,7 @@ public class DFSCC implements DFSClient {
      * @param G the undirected graph
      */
     public DFSCC(UndirectedGraph G) {
-        dfs = new RecDFS(G);
+        dfs = new NonrecDFS(G);
         id = new int[G.V()];
         size = new int[G.V()];
         count = 0;

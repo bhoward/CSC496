@@ -1,17 +1,8 @@
-/******************************************************************************
- *  Compilation:  javac TarjanSCC.java
- *  Execution:    Java TarjanSCC V E
- *  Dependencies: Digraph.java Stack.java TransitiveClosure.java StdOut.java
- *  Data files:   https://algs4.cs.princeton.edu/42digraph/tinyDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/mediumDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/largeDG.txt
+/**
+ * Based on Sedgewick and Wayne,
+ * https://github.com/kevin-wayne/algs4/
  *
- *  Compute the strongly-connected components of a digraph using
- *  Tarjan's algorithm.
- *
- *  Runs in O(E + V) time.
- *
- *  % java TarjanSCC tinyDG.txt
+ *  % java DFSTarjanSCC tinyDG.txt
  *  5 components
  *  1
  *  0 2 3 4 5
@@ -19,12 +10,21 @@
  *  6 8
  *  7
  *
- ******************************************************************************/
+ */
 
 package edu.depauw.algorithms.graph;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Deque;
+import java.util.List;
+import java.util.Scanner;
+
+import edu.depauw.algorithms.ArrayDeque;
+import edu.depauw.algorithms.ArrayList;
+
 /**
- *  The {@code TarjanSCC} class represents a data type for
+ *  The {@code DFSTarjanSCC} class represents a data type for
  *  determining the strong components in a digraph.
  *  The <em>id</em> operation determines in which strong component
  *  a given vertex lies; the <em>areStronglyConnected</em> operation
@@ -43,7 +43,7 @@ package edu.depauw.algorithms.graph;
  *  Each instance method takes &Theta;(1) time.
  *  It uses &Theta;(<em>V</em>) extra space (not including the digraph).
  *  For alternative implementations of the same API, see
- *  {@link KosarajuSharirSCC} and {@link GabowSCC}.
+ *  {@link DFSKosarajuSharirSCC} and {@link DFSGabowSCC}.
  *  <p>
  *  For additional documentation,
  *  see <a href="https://algs4.cs.princeton.edu/42digraph">Section 4.2</a> of
@@ -52,42 +52,42 @@ package edu.depauw.algorithms.graph;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class TarjanSCC {
-
-    private boolean[] marked;        // marked[v] = has v been visited?
+public class DFSTarjanSCC implements DFSClient {
+    private DFS dfs;
     private int[] id;                // id[v] = id of strong component containing v
     private int[] low;               // low[v] = low number of v
     private int pre;                 // preorder number counter
     private int count;               // number of strongly-connected components
-    private Stack<Integer> stack;
+    private Deque<Integer> stack;
 
 
     /**
      * Computes the strong components of the digraph {@code G}.
      * @param G the digraph
      */
-    public TarjanSCC(Digraph G) {
-        marked = new boolean[G.V()];
-        stack = new Stack<Integer>();
+    public DFSTarjanSCC(Digraph G) {
+        dfs = new NonrecDFS(G);
+        stack = new ArrayDeque<>();
         id = new int[G.V()];
         low = new int[G.V()];
         for (int v = 0; v < G.V(); v++) {
-            if (!marked[v]) dfs(G, v);
+            if (!dfs.marked(v)) dfs.dfs(G, v, this);
         }
-
-        // check that id[] gives strong components
-        assert check(G);
     }
 
-    private void dfs(Digraph G, int v) {
-        marked[v] = true;
+    @Override
+    public void visitPreorder(Graph G, int v) {
         low[v] = pre++;
-        int min = low[v];
         stack.push(v);
+    }
+
+    @Override
+    public void visitPostorder(Graph G, int v) {
+        int min = low[v];
         for (int w : G.adj(v)) {
-            if (!marked[w]) dfs(G, w);
             if (low[w] < min) min = low[w];
         }
+        
         if (min < low[v]) {
             low[v] = min;
             return;
@@ -98,9 +98,13 @@ public class TarjanSCC {
             id[w] = count;
             low[w] = G.V();
         } while (w != v);
-        count++;
+        count++;        
     }
 
+    @Override
+    public void processEdge(Graph G, int v, int w) {
+        // Do nothing
+    }
 
     /**
      * Returns the number of strong components.
@@ -109,7 +113,6 @@ public class TarjanSCC {
     public int count() {
         return count;
     }
-
 
     /**
      * Are vertices {@code v} and {@code w} in the same strong component?
@@ -121,8 +124,8 @@ public class TarjanSCC {
      * @throws IllegalArgumentException unless {@code 0 <= w < V}
      */
     public boolean stronglyConnected(int v, int w) {
-        validateVertex(v);
-        validateVertex(w);
+        dfs.validateVertex(v);
+        dfs.validateVertex(w);
         return id[v] == id[w];
     }
 
@@ -133,62 +136,44 @@ public class TarjanSCC {
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int id(int v) {
-        validateVertex(v);
+        dfs.validateVertex(v);
         return id[v];
-    }
-
-    // does the id[] array contain the strongly connected components?
-    private boolean check(Digraph G) {
-        TransitiveClosure tc = new TransitiveClosure(G);
-        for (int v = 0; v < G.V(); v++) {
-            for (int w = 0; w < G.V(); w++) {
-                if (stronglyConnected(v, w) != (tc.reachable(v, w) && tc.reachable(w, v)))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
     }
 
     /**
      * Unit tests the {@code TarjanSCC} data type.
      *
      * @param args the command-line arguments
+     * @throws FileNotFoundException 
      */
-    public static void main(String[] args) {
-        In in = new In(args[0]);
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner in = new Scanner(new File(args[0]));
         Digraph G = new Digraph(in);
-        TarjanSCC scc = new TarjanSCC(G);
+        in.close();
+        DFSTarjanSCC scc = new DFSTarjanSCC(G);
 
         // number of connected components
         int m = scc.count();
-        StdOut.println(m + " components");
+        System.out.println(m + " components");
 
         // compute list of vertices in each strong component
-        Queue<Integer>[] components = (Queue<Integer>[]) new Queue[m];
+        List<List<Integer>> components = new ArrayList<>(m);
         for (int i = 0; i < m; i++) {
-            components[i] = new Queue<Integer>();
+            components.add(i, new ArrayList<>());
         }
         for (int v = 0; v < G.V(); v++) {
-            components[scc.id(v)].enqueue(v);
+            components.get(scc.id(v)).add(v);
         }
 
         // print results
         for (int i = 0; i < m; i++) {
-            for (int v : components[i]) {
-                StdOut.print(v + " ");
+            for (int v : components.get(i)) {
+                System.out.print(v + " ");
             }
-            StdOut.println();
+            System.out.println();
         }
 
     }
-
 }
 
 /******************************************************************************
@@ -214,3 +199,4 @@ public class TarjanSCC {
  *  You should have received a copy of the GNU General Public License
  *  along with algs4.jar.  If not, see http://www.gnu.org/licenses.
  ******************************************************************************/
+

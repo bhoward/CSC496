@@ -74,7 +74,7 @@ public class DFSPaths implements DFSClient {
      * @throws IllegalArgumentException unless {@code 0 <= s < V}
      */
     public DFSPaths(Graph G, int s) {
-        dfs = new RecDFS(G);
+        dfs = new NonrecDFS(G);
         this.s = s;
         edgeTo = new int[G.V()];
         dfs.validateVertex(s);

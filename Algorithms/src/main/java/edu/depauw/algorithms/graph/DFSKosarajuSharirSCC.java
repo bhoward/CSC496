@@ -2,7 +2,7 @@
  * Based on Sedgewick and Wayne,
  * https://github.com/kevin-wayne/algs4/
  *
- *  % java KosarajuSharirSCC tinyDG.txt
+ *  % java DFSKosarajuSharirSCC tinyDG.txt
  *  5 strong components
  *  1
  *  0 2 3 4 5
@@ -10,7 +10,7 @@
  *  6 8
  *  7
  *
- *  % java KosarajuSharirSCC mediumDG.txt
+ *  % java DFSKosarajuSharirSCC mediumDG.txt
  *  10 strong components
  *  21
  *  2 5 6 8 9 11 12 13 15 16 18 19 22 23 25 26 28 29 30 31 32 33 34 35 37 38 39 40 42 43 44 46 47 48 49
@@ -23,7 +23,7 @@
  *  0
  *  10
  *
- *  % java KosarajuSharirSCC largeDG.txt
+ *  % java DFSKosarajuSharirSCC largeDG.txt
  *  25 strong components
  *  7 11 32 36 61 84 95 116 121 128 230   ...
  *  28 73 80 104 115 143 149 164 184 185  ...
@@ -63,7 +63,7 @@ import java.util.Scanner;
 import edu.depauw.algorithms.ArrayList;
 
 /**
- *  The {@code KosarajuSharirSCC} class represents a data type for
+ *  The {@code DFSKosarajuSharirSCC} class represents a data type for
  *  determining the strong components in a digraph.
  *  The <em>id</em> operation determines in which strong component
  *  a given vertex lies; the <em>areStronglyConnected</em> operation
@@ -82,7 +82,7 @@ import edu.depauw.algorithms.ArrayList;
  *  Each instance method takes &Theta;(1) time.
  *  It uses &Theta;(<em>V</em>) extra space (not including the digraph).
  *  For alternative implementations of the same API, see
- *  {@link TarjanSCC} and {@link GabowSCC}.
+ *  {@link DFSTarjanSCC} and {@link DFSGabowSCC}.
  *  <p>
  *  For additional documentation, see
  *  <a href="https://algs4.cs.princeton.edu/42digraph">Section 4.2</a> of
@@ -91,7 +91,7 @@ import edu.depauw.algorithms.ArrayList;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class KosarajuSharirSCC implements DFSClient {
+public class DFSKosarajuSharirSCC implements DFSClient {
     private DFS dfs;
     private int[] id;             // id[v] = id of strong component containing v
     private int count;            // number of strongly-connected components
@@ -100,7 +100,7 @@ public class KosarajuSharirSCC implements DFSClient {
      * Computes the strong components of the digraph {@code G}.
      * @param G the digraph
      */
-    public KosarajuSharirSCC(Digraph G) {
+    public DFSKosarajuSharirSCC(Digraph G) {
         // compute reverse postorder of reverse graph
         Iterable<Integer> post = new DFSOrder(G.reverse()).reversePost();
 
@@ -174,7 +174,7 @@ public class KosarajuSharirSCC implements DFSClient {
         Scanner in = new Scanner(new File(args[0]));
         Digraph G = new Digraph(in);
         in.close();
-        KosarajuSharirSCC scc = new KosarajuSharirSCC(G);
+        DFSKosarajuSharirSCC scc = new DFSKosarajuSharirSCC(G);
 
         // number of connected components
         int m = scc.count();

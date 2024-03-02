@@ -48,7 +48,7 @@ public class DFSBipartite implements DFSClient {
      * @param G the graph
      */
     public DFSBipartite(UndirectedGraph G) {
-        dfs = new RecDFS(G);
+        dfs = new NonrecDFS(G);
         isBipartite = true;
         color = new boolean[G.V()];
         edgeTo = new int[G.V()];

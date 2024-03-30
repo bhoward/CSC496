@@ -32,6 +32,10 @@
 
 package edu.depauw.algorithms.graph;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 /**
  *  The {@code TransitiveClosure} class represents a data type for
  *  computing the transitive closure of a digraph.
@@ -56,16 +60,16 @@ package edu.depauw.algorithms.graph;
  *  @author Kevin Wayne
  */
 public class TransitiveClosure {
-    private DirectedDFS[] tc;  // tc[v] = reachable from v
+    private DFSConnected[] tc;  // tc[v] = reachable from v
 
     /**
      * Computes the transitive closure of the digraph {@code G}.
      * @param G the digraph
      */
     public TransitiveClosure(Digraph G) {
-        tc = new DirectedDFS[G.V()];
+        tc = new DFSConnected[G.V()];
         for (int v = 0; v < G.V(); v++)
-            tc[v] = new DirectedDFS(G, v);
+            tc[v] = new DFSConnected(G, v);
     }
 
     /**
@@ -94,28 +98,30 @@ public class TransitiveClosure {
      * Unit tests the {@code TransitiveClosure} data type.
      *
      * @param args the command-line arguments
+     * @throws FileNotFoundException 
      */
-    public static void main(String[] args) {
-        In in = new In(args[0]);
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner in = new Scanner(new File(args[0]));
         Digraph G = new Digraph(in);
+        in.close();
 
         TransitiveClosure tc = new TransitiveClosure(G);
 
         // print header
-        StdOut.print("     ");
+        System.out.print("     ");
         for (int v = 0; v < G.V(); v++)
-            StdOut.printf("%3d", v);
-        StdOut.println();
-        StdOut.println("--------------------------------------------");
+            System.out.printf("%3d", v);
+        System.out.println();
+        System.out.println("--------------------------------------------");
 
         // print transitive closure
         for (int v = 0; v < G.V(); v++) {
-            StdOut.printf("%3d: ", v);
+            System.out.printf("%3d: ", v);
             for (int w = 0; w < G.V(); w++) {
-                if (tc.reachable(v, w)) StdOut.printf("  T");
-                else                    StdOut.printf("   ");
+                if (tc.reachable(v, w)) System.out.printf("  T");
+                else                    System.out.printf("   ");
             }
-            StdOut.println();
+            System.out.println();
         }
     }
 
